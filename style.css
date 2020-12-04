@@ -1,4 +1,4 @@
-body {
+/*body {
   margin: 0;
   padding: 0;
   width: 100vw;
@@ -10,7 +10,10 @@ body {
 
 canvas {
   position: absolute;
-}
-/*video{
-    display: none;
 }*/
+body{
+    text-align: center;
+}
+ canvas{
+    display: none;
+}
