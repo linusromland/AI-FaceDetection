@@ -1,9 +1,9 @@
 let imgUp = document.getElementById("imgUp");
 
 Promise.all([
-  faceapi.nets.faceRecognitionNet.loadFromUri("/models"),
-  faceapi.nets.faceLandmark68Net.loadFromUri("/models"),
-  faceapi.nets.ssdMobilenetv1.loadFromUri("/models"),
+  faceapi.nets.faceRecognitionNet.loadFromUri("./models"),
+  faceapi.nets.faceLandmark68Net.loadFromUri("./models"),
+  faceapi.nets.ssdMobilenetv1.loadFromUri("./models"),
 ]).then(runProgram);
 
 async function runProgram() {
@@ -57,7 +57,7 @@ function loadLabeledImages() {
       const descriptions = [];
       for (let i = 1; i <= 2; i++) {
         const img = await faceapi.fetchImage(
-          `/labeled_images/${label}/${i}.jpg`
+          `./labeled_images/${label}/${i}.jpg`
         );
         const detections = await faceapi
           .detectSingleFace(img)
