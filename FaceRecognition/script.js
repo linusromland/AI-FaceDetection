@@ -34,6 +34,7 @@ async function runProgram() {
     );
     results.forEach((result, i) => {
       let box = resizedDetections[i].detection.box;
+      console.log(resizedDetections[i].detection)
       let drawBox = new faceapi.draw.DrawBox(box, { label: result.toString() });
       drawBox.draw(canvas);
     });
@@ -49,6 +50,7 @@ function loadLabeledImages() {
     "Jim Rhodes",
     "Thor",
     "Tony Stark",
+    "Linus Romland"
   ];
   return Promise.all(
     labels.map(async (label) => {
