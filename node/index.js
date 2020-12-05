@@ -1,25 +1,67 @@
-require("@tensorflow/tfjs-node");
-const canvas = require("canvas");
-const faceapi = require("face-api.js");
-const fs = require("fs");
-//const fetch = require("node-fetch");
-const express = require("express");
-let app;
-const port = 3000;
+const faceapi = require("face-api.js")  
+const canvas = require("canvas")  
+const fs = require("fs")  
+const path = require("path")
 
-const { Canvas, Image, ImageData } = canvas;
-faceapi.env.monkeyPatch({ Canvas, Image, ImageData });
-//faceapi.env.monkeyPatch({ fetch: fetch });
+// mokey pathing the faceapi canvas
+const { Canvas, Image, ImageData } = canvas  
+faceapi.env.monkeyPatch({ Canvas, Image, ImageData })
 
-let models = __dirname + "/models";
+const faceDetectionNet = faceapi.nets.ssdMobilenetv1
 
-console.log(models);
+// SsdMobilenetv1Options
+const minConfidence = 0.5
 
-Promise.all([
-  faceapi.nets.faceRecognitionNet.loadFromDisk(models),
-  faceapi.nets.faceLandmark68Net.loadFromDisk(models),
-  faceapi.nets.ssdMobilenetv1.loadFromDisk(models),
-]).then((app = express()));
+// TinyFaceDetectorOptions
+const inputSize = 408  
+const scoreThreshold = 0.5
 
-app.get("/", (req, res) => res.send("Hello World!"));
-app.listen(port, () => console.log(`Server listening on port ${port}!`));
+// MtcnnOptions
+const minFaceSize = 50  
+const scaleFactor = 0.8
+
+function getFaceDetectorOptions(net) {  
+    return net === faceapi.nets.ssdMobilenetv1
+        ? new faceapi.SsdMobilenetv1Options({ minConfidence })
+        : (net === faceapi.nets.tinyFaceDetector
+            ? new faceapi.TinyFaceDetectorOptions({ inputSize, scoreThreshold })
+            : new faceapi.MtcnnOptions({ minFaceSize, scaleFactor })
+        )
+}
+
+const faceDetectionOptions = getFaceDetectorOptions(faceDetectionNet)
+
+// simple utils to save files
+const baseDir = path.resolve(__dirname, './out')  
+function saveFile(fileName, buf) {  
+    if (!fs.existsSync(baseDir)) {
+      fs.mkdirSync(baseDir)
+    }
+    // this is ok for prototyping but using sync methods
+    // is bad practice in NodeJS
+    fs.writeFileSync(path.resolve(baseDir, fileName), buf)
+  }
+
+async function run() {
+
+    // load weights
+    await faceDetectionNet.loadFromDisk('models')
+    await faceapi.nets.faceLandmark68Net.loadFromDisk('models')
+
+    // load the image
+    const img = await canvas.loadImage(__dirname + '/labeled_images/Linus Romland/2.jpg')
+
+    // detect the faces with landmarks
+    const results = await faceapi.detectAllFaces(img, faceDetectionOptions)
+        .withFaceLandmarks()
+    // create a new canvas and draw the detection and landmarks
+    const out = faceapi.createCanvasFromMedia(img)
+    faceapi.drawDetection(out, results.map(res => res.detection))
+    faceapi.drawLandmarks(out, results.map(res => res.landmarks), { drawLines: true, color: 'red' })
+
+    // save the new canvas as image
+    saveFile('faceLandmarkDetection.jpg', out.toBuffer('image/jpeg'))
+    console.log('done, saved results to out/faceLandmarkDetection.jpg')
+}
+
+run()
