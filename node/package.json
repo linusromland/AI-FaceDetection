@@ -10,7 +10,11 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "express": "^4.17.1"
+    "@tensorflow/tfjs-node": "^2.7.0",
+    "canvas": "^2.6.1",
+    "express": "^4.17.1",
+    "face-api.js": "^0.22.2",
+    "node-fetch": "^2.6.1"
   },
   "devDependencies": {
     "nodemon": "^2.0.6"

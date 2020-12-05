@@ -50,7 +50,8 @@ function loadLabeledImages() {
     "Jim Rhodes",
     "Thor",
     "Tony Stark",
-    "Linus Romland"
+    "Linus Romland",
+    "matte är kul"
   ];
   return Promise.all(
     labels.map(async (label) => {
